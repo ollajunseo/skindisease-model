@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>피부병 진단 모델</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/new.css') }}">
+</head>
+<body>
+    <header>
+        <div class="title">피부병 진단기</div>
+    </header>
+    <main class="container">
+        <div class="left"></div>
+        <div class="center" id="centerDiv" style="border: 5px outset red;"></div>
+        <div class="right"></div>
+    </main>
+    <footer class="footer">
+        <div class="left01"></div>
+        <div class="center01">
+            <form id="fileUploadForm" enctype="multipart/form-data" method="post" action="/upload">
+                <input type="file" id="fileInput" name="file" style="display: none;">
+                <button class="btn" id="uploadButton" type="button">파일 첨부하기</button>
+            </form>
+            <button class="btn01" id="resultButton" type="button">결과보기</button>
+        </div>
+        <div class="right01"></div>
+    </footer>
+    <script>
+    window.onload = function() {
+        document.body.style.backgroundImage = "url('static/img/business-card-760931_1280.png')";
+        document.body.style.backgroundSize = "cover";
+    }
+
+    const fileInput = document.getElementById('fileInput');
+    const centerDiv = document.getElementById('centerDiv');
+    const uploadButton = document.getElementById('uploadButton');
+    const resultButton = document.getElementById('resultButton');
+    const uploadedImage = document.createElement('img');
+    uploadedImage.style.maxWidth = '100%';
+    uploadedImage.style.maxHeight = '100%';
+
+    uploadButton.addEventListener('click', function() {
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', function() {
+        resultButton.disabled = false;
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+
+            centerDiv.innerHTML = ''; // .center 비우기
+            uploadedImage.src = e.target.result;
+            centerDiv.appendChild(uploadedImage);
+        };
+
+        reader.readAsDataURL(file);
+    });
+
+    resultButton.addEventListener('click', function() {
+        const file = fileInput.files[0];
+        const formData = new FormData(document.getElementById('fileUploadForm'));
+
+        fetch('/upload', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(`결과: ${data.result}, 정확도: ${Math.round(data.accuracy * 100)}%`);
+        });
+    });
+</script>
+</body>
+</html>
